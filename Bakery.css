@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en" class=""> <!-- The 'dark' class will be added here by JS --><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Bakery</title>
+    
+    <!-- Load Tailwind CSS --><script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Configuration for Tailwind to use the 'Inter' font and enable 'class' dark mode --><script>
+        tailwind.config = {
+            darkMode: 'class', // This is the key change to enable class-based dark mode
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        'bakery-brown': {
+                            'light': '#f9e6b8',
+                            'DEFAULT': '#d2a679',
+                            'dark': '#8c5a2e',
+                        },
+                        'bakery-accent': '#c7a17a',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Custom styles for a few elements --><style>
+        /* Smooth scrolling for anchor links */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Active state for menu filter buttons */
+        .menu-tab-active {
+            background-color: #c7a17a; /* bakery-accent */
+            color: white !important; /* Ensure text is white on active */
+        }
+
+        /* Dark mode overrides for active tab */
+        .dark .menu-tab-active {
+            background-color: #c7a17a; /* bakery-accent */
+        }
+
+        /* Simple fade-in animation for sections */
+        .section-fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+
+        .section-fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Nav link underline animation */
+        .nav-link {
+            position: relative;
+            text-decoration: none;
+            padding-bottom: 4px; /* Space for the underline */
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            bottom: 0;
+            left: 0;
+            background-color: #c7a17a; /* bakery-accent */
+            transform: scaleX(0);
+            transform-origin: bottom right;
+            transition: transform 0.3s ease-out;
+        }
+
+        .nav-link:hover::after {
+            transform: scaleX(1);
+            transform-origin: bottom left;
+        }
+
+        /* Menu item image zoom on hover */
+        .menu-item img {
+            transition: transform 0.4s ease-out;
+        }
+        .menu-item:hover img {
+            transform: scale(1.1);
+        }
+
+        /* Hamburger menu animation */
+        .hamburger {
+            cursor: pointer;
+            transition: transform 0.3s ease-in-out;
+        }
+        .hamburger .line {
+            width: 24px;
+            height: 2px;
+            background-color: #374151; /* gray-700 */
+            display: block;
+            margin: 5px 0;
+            transition: all 0.3s ease-in-out;
+        }
+        .dark .hamburger .line {
+            background-color: #f3f4f6; /* gray-100 */
+        }
+        .hamburger.is-active {
+            transform: rotate(180deg);
+        }
+        .hamburger.is-active .line:nth-child(1) {
+            transform: translateY(7px) rotate(45deg);
+        }
+        .hamburger.is-active .line:nth-child(2) {
+            opacity: 0;
+        }
+        .hamburger.is-active .line:nth-child(3) {
+            transform: translateY(-7px) rotate(-45deg);
+        }
+
+        /* Animation for hero text */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Apply animations with delay */
+        #home h1 {
+            animation: fadeInDown 1s ease-out 0.5s both; /* 0.5s delay, runs once, stays at end state */
+        }
+        #home p {
+            animation: fadeInUp 1s ease-out 1s both; /* 1s delay */
+        }
+        #home .hero-button { /* Added class to target button */
+            animation: fadeInUp 1s ease-out 1.5s both; /* 1.5s delay */
+        }
+    </style>
+
+    <!-- This script applies dark mode BEFORE page load to prevent flashing --><script>
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+          document.documentElement.classList.add('dark');
+          localStorage.setItem('theme', 'dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+          localStorage.setItem('theme', 'light');
+        }
+    </script>
+</head>
+<body class="font-sans text-gray-800 antialiased bg-white dark:bg-gray-900 dark:text-gray-200">
+
+    <!-- 
+      HEADER & NAVIGATION 
+      - Sticky header for easy navigation.
+      - Includes a mobile-friendly hamburger menu.
+    --><header class="bg-white dark:bg-gray-800 shadow-md sticky top-0 z-50 transition-colors duration-300">
+        <nav class="container mx-auto max-w-6xl px-4 py-4 flex justify-between items-center">
+            <!-- Logo/Brand Name --><a href="#home" class="text-2xl font-bold text-bakery-dark dark:text-bakery-brown-light">
+                Simple Bakery
+            </a>
+
+            <!-- Desktop Navigation & Dark Mode Toggle --><div class="hidden md:flex items-center space-x-6">
+                <a href="#home" class="nav-link text-gray-600 hover:text-bakery-accent dark:text-gray-300 dark:hover:text-bakery-accent transition duration-300">Home</a>
+                <a href="#menu" class="nav-link text-gray-600 hover:text-bakery-accent dark:text-gray-300 dark:hover:text-bakery-accent transition duration-300">Menu</a>
+                <a href="#about" class="nav-link text-gray-600 hover:text-bakery-accent dark:text-gray-300 dark:hover:text-bakery-accent transition duration-300">About</a>
+                <a href="#contact" class="nav-link text-gray-600 hover:text-bakery-accent dark:text-gray-300 dark:hover:text-bakery-accent transition duration-300">Contact</a>
+                
+                <!-- Dark Mode Toggle (Desktop) --><button id="theme-toggle-desktop" class="text-gray-600 dark:text-gray-300 hover:text-bakery-accent dark:hover:text-bakery-accent transition-colors duration-300 focus:outline-none">
+                    <svg id="theme-icon-sun-desktop" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                    <svg id="theme-icon-moon-desktop" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                </button>
+            </div>
+
+            <!-- Mobile Menu Button (Hamburger) --><button id="menu-btn" class="md:hidden focus:outline-none hamburger">
+                <span class="line"></span>
+                <span class="line"></span>
+                <span class="line"></span>
+            </button>
+        </nav>
+
+        <!-- Mobile Menu (Hidden by default) --><div id="mobile-menu" class="md:hidden hidden bg-white dark:bg-gray-800 shadow-lg">
+            <a href="#home" class="block py-3 px-4 text-sm text-gray-700 dark:text-gray-200 hover:bg-bakery-brown-light dark:hover:bg-gray-700 transition duration-300">Home</a>
+            <a href="#menu" class="block py-3 px-4 text-sm text-gray-700 dark:text-gray-200 hover:bg-bakery-brown-light dark:hover:bg-gray-700 transition duration-300">Menu</a>
+            <a href="#about" class="block py-3 px-4 text-sm text-gray-700 dark:text-gray-200 hover:bg-bakery-brown-light dark:hover:bg-gray-700 transition duration-300">About</a>
+            <a href="#contact" class="block py-3 px-4 text-sm text-gray-700 dark:text-gray-200 hover:bg-bakery-brown-light dark:hover:bg-gray-700 transition duration-300">Contact</a>
+            <!-- Dark Mode Toggle (Mobile) --><div class="px-4 py-3">
+                <button id="theme-toggle-mobile" class="w-full flex items-center justify-center text-sm text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 py-2 rounded-md transition-colors duration-300 focus:outline-none">
+                    <svg id="theme-icon-sun-mobile" class="w-5 h-5 mr-2 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                    <svg id="theme-icon-moon-mobile" class="w-5 h-5 mr-2 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                    <span id="theme-toggle-text-mobile"></span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT --><main>
+
+        <!-- 
+          HOME SECTION 
+          - Hero section with a welcoming message and call to action.
+        --><section id="home" class="min-h-screen flex items-center justify-center bg-bakery-brown-light/30 dark:bg-gray-800 pt-16 section-fade-in transition-colors duration-300">
+            <div class="container mx-auto max-w-6xl px-4 text-center">
+                <h1 class="text-4xl md:text-6xl font-bold text-bakery-dark dark:text-bakery-brown-light mb-4">
+                    Freshly Baked Goodness
+                </h1>
+                <p class="text-lg md:text-xl text-gray-700 dark:text-gray-300 mb-8">
+                    Made from scratch with love and the finest ingredients, every single day.
+                </p>
+                <a href="#menu" class="hero-button bg-bakery-accent text-white font-bold py-3 px-8 rounded-full shadow-lg hover:bg-bakery-dark transition duration-300 transform hover:scale-105">
+                    See Our Menu
+                </a>
+            </div>
+        </section>
+
+        <!-- 
+          MENU SECTION 
+          - Interactive menu with clickable tabs to filter items.
+        --><section id="menu" class="py-20 bg-white dark:bg-gray-900 section-fade-in transition-colors duration-300">
+            <div class="container mx-auto max-w-6xl px-4">
+                <h2 class="text-3xl font-bold text-center text-bakery-dark dark:text-bakery-brown-light mb-12">
+                    Our Menu
+                </h2>
+                
+                <!-- Menu Filter Tabs --><div id="menu-tabs" class="flex flex-wrap justify-center space-x-2 md:space-x-4 mb-10">
+                    <button class="menu-tab menu-tab-active py-2 px-4 rounded-full font-medium mb-2 transition duration-300" data-filter="all">All</button>
+                    <button class="menu-tab bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 py-2 px-4 rounded-full font-medium mb-2 transition duration-300" data-filter="bread">Breads</button>
+                    <button class="menu-tab bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 py-2 px-4 rounded-full font-medium mb-2 transition duration-300" data-filter="pastry">Pastries</button>
+                    <button class="menu-tab bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 py-2 px-4 rounded-full font-medium mb-2 transition duration-300" data-filter="cake">Cakes</button>
+                </div>
+
+                <!-- Menu Items Grid --><div id="menu-items" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- Item 1 (Bread) --><div class="menu-item bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-2" data-category="bread">
+                        <img src="https://images.unsplash.com/photo-1578310003381-P3f1619623b1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w0NzEyNjZ8MHwxfHNlYXJjaHw0fHxjb2xvcmZ1bCUyMGJyZWFkfGVufDB8MHx8fDE3MTk0MjU4ODV8MA&ixlib=rb-4.0.3&q=80&w=1080" alt="Colourful Bread" class="w-full h-48 object-cover" onerror="this.src='https://placehold.co/600x400/f9e6b8/8c5a2e?text=Sourdough'">
+                        <div class="p-6">
+                            <h3 class="text-xl font-bold text-bakery-dark dark:text-bakery-brown-light mb-2">Artisan Rainbow Loaf</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">A vibrant sourdough with natural food colourings, perfect for special occasions.</p>
+                            <span class="text-lg font-bold text-bakery-accent">$12.00</span>
+                        </div>
+                    </div>
+                    <!-- Item 2 (Pastry) --><div class="menu-item bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-2" data-category="pastry">
+                        <img src="https://images.unsplash.com/photo-1587665933301-2e67f252f4c9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w0NzEyNjZ8MHwxfHNlYXJjaHwzfHxyYWluYm93JTIwY3JvaXNzYW50fGVufDB8MHx8fDE3MTk0MjU5Mjd8MA&ixlib=rb-4.0.3&q=80&w=1080" alt="Colourful Macarons" class="w-full h-48 object-cover" onerror="this.src='https://placehold.co/600x400/f9e6b8/8c5a2e?text=Croissant'">
+                        <div class="p-6">
+                            <h3 class="text-xl font-bold text-bakery-dark dark:text-bakery-brown-light mb-2">Assorted Macarons</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">Delicate French macarons in a rainbow of flavors and colors.</p>
+                            <span class="text-lg font-bold text-bakery-accent">$3.00 each</span>
+                        </div>
+                    </div>
+                    <!-- Item 3 (Cake) --><div class="menu-item bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-2" data-category="cake">
+                        <img src="https://images.unsplash.com/photo-1562440101-953c8b7c3875?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w0NzEyNjZ8MHwxfHNlYXJjaHw3fHxyYWluYm93JTIwY2FrZXxlbnwwfDB8fHwxNzE5NDI1OTU5fDA&ixlib=rb-4.0.3&q=80&w=1080" alt="Colourful Layer Cake" class="w-full h-48 object-cover" onerror="this.src='https://placehold.co/600x400/f9e6b8/8c5a2e?text=Chocolate+Cake'">
+                        <div class="p-6">
+                            <h3 class="text-xl font-bold text-bakery-dark dark:text-bakery-brown-light mb-2">Confetti Celebration Cake</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">Vanilla bean cake with colorful sprinkles and a smooth buttercream frosting.</p>
+                            <span class="text-lg font-bold text-bakery-accent">$7.50 / slice</span>
+                        </div>
+                    </div>
+                    <!-- Item 4 (Bread) --><div class="menu-item bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-2" data-category="bread">
+                        <img src="https://images.unsplash.com/photo-1620921282121-6d756e01c874?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w0NzEyNjZ8MHwxfHNlYXJjaHw1fHxjb2xvcmZ1bCUyMGNvb2tpZXN8ZW5mDB8MHx8fDE3MTk0MjU5ODV8MA&ixlib=rb-4.0.3&q=80&w=1080" alt="Colorful Cookies" class="w-full h-48 object-cover" onerror="this.src='https://placehold.co/600x400/f9e6b8/8c5a2e?text=Baguette'">
+                        <div class="p-6">
+                            <h3 class="text-xl font-bold text-bakery-dark dark:text-bakery-brown-light mb-2">Frosted Sugar Cookies</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">Soft sugar cookies decorated with vibrant royal icing, changing seasonally.</p>
+                            <span class="text-lg font-bold text-bakery-accent">$2.50 each</span>
+                        </div>
+                    </div>
+                    <!-- Item 5 (Pastry) --><div class="menu-item bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-2" data-category="pastry">
+                        <img src="https://images.unsplash.com/photo-1567000537333-a8161e006e12?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w0NzEyNjZ8MHwxfHNlYXJjaHwzfHxjb2xvcmZ1bCUyMGZydWl0JTIwdGFydHxlbnwwfDB8fHwxNzE5NDI3MDIwfDA&ixlib=rb-4.0.3&q=80&w=1080" alt="Colourful Fruit Tart" class="w-full h-48 object-cover" onerror="this.src='https://placehold.co/600x400/f9e6b8/8c5a2e?text=Danish'">
+                        <div class="p-6">
+                            <h3 class="text-xl font-bold text-bakery-dark dark:text-bakery-brown-light mb-2">Summer Fruit Tart</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">Fresh seasonal fruits atop a creamy pastry cream and crisp crust.</p>
+                            <span class="text-lg font-bold text-bakery-accent">$6.50 / slice</span>
+                        </div>
+                    </div>
+                    <!-- Item 6 (Cake) --><div class="menu-item bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-2" data-category="cake">
+                        <img src="https://images.unsplash.com/photo-1614708442642-53e030e571c3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w0NzEyNjZ8MHwxfHNlYXJjaHw4fHxjb2xvcmZ1bCUyMGN1cGNha2VzfGVufDB8MHx8fDE3MTk0MjY0MDZ8MA&ixlib=rb-4.0.3&q=80&w=1080" alt="Colorful Cupcakes" class="w-full h-48 object-cover" onerror="this.src='https://placehold.co/600x400/f9e6b8/8c5a2e?text=Cheesecake'">
+                        <div class="p-6">
+                            <h3 class="text-xl font-bold text-bakery-dark dark:text-bakery-brown-light mb-2">Variety Cupcake Box</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">A selection of our most popular cupcakes, each with unique frosting and toppings.</p>
+                            <span class="text-lg font-bold text-bakery-accent">$24.00 / dozen</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 
+          ABOUT SECTION 
+          - A simple two-column layout introducing the bakery.
+        --><section id="about" class="py-20 bg-bakery-brown-light/30 dark:bg-gray-800 section-fade-in transition-colors duration-300">
+            <div class="container mx-auto max-w-6xl px-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                    <div>
+                        <img src="https://source.unsplash.com/600x450/?bakery,interior" alt="Inside the bakery" class="rounded-lg shadow-lg w-full" onerror="this.src='https://placehold.co/600x450/d2a679/white?text=Our+Story'">
+                    </div>
+                    <div class="text-left">
+                        <h2 class="text-3xl font-bold text-bakery-dark dark:text-bakery-brown-light mb-6">
+                            Our Story
+                        </h2>
+                        <p class="text-gray-700 dark:text-gray-300 mb-4 leading-relaxed">
+                            Welcome to Simple Bakery, where our passion for baking is baked into every item we create. Founded in 2020, our mission has always been to bring joy to our community through the simple pleasure of handcrafted baked goods.
+                        </p>
+                        <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
+                            We use only the finest, locally-sourced ingredients and traditional baking methods. Every loaf, pastry, and cake is made from scratch daily, ensuring you always get the freshest, most delicious treats.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 
+          CONTACT SECTION 
+          - A simple contact form and contact details.
+        --><section id="contact" class="py-20 bg-white dark:bg-gray-900 section-fade-in transition-colors duration-300">
+            <div class="container mx-auto max-w-3xl px-4 text-center">
+                <h2 class="text-3xl font-bold text-bakery-dark dark:text-bakery-brown-light mb-6">
+                    Get In Touch
+                </h2>
+                <p class="text-gray-700 dark:text-gray-300 mb-8 leading-relaxed">
+                    Have a question or a special order? We'd love to hear from you.
+                </p>
+
+                <!-- Contact Form --><form class="text-left grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name</label>
+                        <input type="text" id="name" name="name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-bakery-accent focus:border-bakery-accent bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white dark:placeholder-gray-400" placeholder="Your Name">
+                    </div>
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
+                        <input type="email" id="email" name="email" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-bakery-accent focus:border-bakery-accent bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white dark:placeholder-gray-400" placeholder="your@email.com">
+                    </div>
+                    <div class="md:col-span-2">
+                        <label for="message" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Message</label>
+                        <textarea id="message" name="message" rows="5" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-bakery-accent focus:border-bakery-accent bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white dark:placeholder-gray-400" placeholder="Your message..."></textarea>
+                    </div>
+                    <div class="md:col-span-2 text-center">
+                        <button type="submit" class="bg-bakery-accent text-white font-bold py-3 px-8 rounded-full shadow-lg hover:bg-bakery-dark transition duration-300 transform hover:scale-105">
+                            Send Message
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Contact Details --><div class="mt-16 text-gray-700 dark:text-gray-300">
+                    <p class="text-lg font-medium mb-2">123 Bread Lane, Pastryville, CA 90210</p>
+                    <p class="text-lg mb-2">(123) 456-7890</p>
+                    <p class="text-lg">hello@simplebakery.com</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- 
+      FOOTER 
+      - Simple footer with copyright.
+    --><footer class="bg-gray-900 text-gray-400 py-8">
+        <div class="container mx-auto max-w-6xl px-4 text-center">
+            <p>&copy; 2025 Simple Bakery. All rights reserved.</p>
+        </div>
+    </footer>
+
+
+    <!-- 
+      JAVASCRIPT 
+      - Handles the mobile menu toggle.
+      - Handles the interactive menu filtering.
+      - Handles the fade-in-on-scroll animation.
+      - Handles the dark mode theme toggle.
+    --><script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const htmlElement = document.documentElement;
+            const menuBtn = document.getElementById('menu-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const mobileMenuLinks = mobileMenu.querySelectorAll('a');
+
+            // --- Dark Mode Toggle Elements ---
+            const themeToggleDesktop = document.getElementById('theme-toggle-desktop');
+            const themeToggleMobile = document.getElementById('theme-toggle-mobile');
+            const sunIconDesktop = document.getElementById('theme-icon-sun-desktop');
+            const moonIconDesktop = document.getElementById('theme-icon-moon-desktop');
+            const sunIconMobile = document.getElementById('theme-icon-sun-mobile');
+            const moonIconMobile = document.getElementById('theme-icon-moon-mobile');
+            const themeToggleTextMobile = document.getElementById('theme-toggle-text-mobile');
+
+            // --- Function to update theme icons and text ---
+            function updateThemeUI() {
+                const isDarkMode = htmlElement.classList.contains('dark');
+                if (isDarkMode) {
+                    sunIconDesktop.classList.remove('hidden');
+                    moonIconDesktop.classList.add('hidden');
+                    sunIconMobile.classList.remove('hidden');
+                    moonIconMobile.classList.add('hidden');
+                    themeToggleTextMobile.textContent = 'Light Mode';
+                } else {
+                    sunIconDesktop.classList.add('hidden');
+                    moonIconDesktop.classList.remove('hidden');
+                    sunIconMobile.classList.add('hidden');
+                    moonIconMobile.classList.remove('hidden');
+                    themeToggleTextMobile.textContent = 'Dark Mode';
+                }
+            }
+
+            // --- Function to toggle theme ---
+            function toggleTheme() {
+                const isDarkMode = htmlElement.classList.contains('dark');
+                if (isDarkMode) {
+                    htmlElement.classList.remove('dark');
+                    localStorage.setItem('theme', 'light');
+                } else {
+                    htmlElement.classList.add('dark');
+                    localStorage.setItem('theme', 'dark');
+                }
+                updateThemeUI();
+            }
+
+            // --- Set initial UI state and add listeners ---
+            updateThemeUI();
+            themeToggleDesktop.addEventListener('click', toggleTheme);
+            themeToggleMobile.addEventListener('click', toggleTheme);
+
+
+            // --- Mobile Menu Toggle (with 'is-active' class) ---
+            menuBtn.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+                menuBtn.classList.toggle('is-active'); // Toggle animation class
+            });
+
+            // Close mobile menu when a link is clicked
+            mobileMenuLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                    mobileMenu.classList.add('hidden');
+                    menuBtn.classList.remove('is-active'); // Remove animation class
+                });
+            });
+
+            // --- Menu Filtering ---
+            const menuTabs = document.querySelectorAll('.menu-tab');
+            const menuItems = document.querySelectorAll('.menu-item');
+
+            menuTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const filter = tab.getAttribute('data-filter');
+
+                    // Update active tab style
+                    menuTabs.forEach(t => t.classList.remove('menu-tab-active', 'bg-gray-100', 'hover:bg-gray-200', 'dark:bg-gray-700', 'dark:hover:bg-gray-600'));
+                    menuTabs.forEach(t => {
+                        if (t.getAttribute('data-filter') === filter) {
+                            t.classList.add('menu-tab-active');
+                        } else {
+                            t.classList.add('bg-gray-100', 'hover:bg-gray-200', 'dark:bg-gray-700', 'dark:hover:bg-gray-600');
+                        }
+                    });
+
+                    // Filter menu items
+                    menuItems.forEach(item => {
+                        const category = item.getAttribute('data-category');
+                        if (filter === 'all' || filter === category) {
+                            item.style.display = 'block';
+                        } else {
+                            item.style.display = 'none';
+                        }
+                    });
+                });
+            });
+
+            // --- Fade-in on Scroll Animation ---
+            const sections = document.querySelectorAll('.section-fade-in');
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, {
+                threshold: 0.1 // Trigger when 10% of the section is visible
+            });
+
+            sections.forEach(section => {
+                observer.observe(section);
+            });
+        });
+    </script>
+
+</body>
+</html>
