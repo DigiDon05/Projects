@@ -44,9 +44,8 @@ int main() {
   obj1.input();
   obj1.showSum();
 
+  // Parameterized constructor + user input
   int x, y;
-
-  // User input for parameterized constructor
   cout << "\nEnter two numbers for parameterized constructor: ";
   cin >> x >> y;
 
