@@ -12,7 +12,7 @@ public:
 };
 
 void test() {
-    static Demo obj;  // Static object
+    static Demo obj;
 }
 
 int main() {
